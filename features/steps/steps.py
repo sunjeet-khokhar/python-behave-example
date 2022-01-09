@@ -2,21 +2,32 @@ import time
 import environment
 import asyncio
 from playwright.sync_api import sync_playwright
+from playwright.async_api import async_playwright
+from behave import step
+from behave.api.async_step import async_run_until_complete
+from playwright.async_api import async_playwright
 
-from features.environment import before_all
+from features.environment import before_feature
 
-@given('a Browser session is active')
-def initiate_browser(context):
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False)
-        context.page = browser.new_page()
-        context.page.goto('https://google.com')
+@step('fire up the browser')
+@async_run_until_complete
+async def initiate_browser(context):
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(headless=False,slow_mo=3000)
+        page = await browser.new_page()
+        #return(page)
+        #page.goto('https://wikipedia.org')
+        
 
+@async_run_until_complete
 @when('visit url "{url}"')
-def visit_page(context, url):
+def step(context, url):
+    #initiate_browser(context)
     #this does not work ..event loop closed error
-    context.page.goto('https://example.com')
-    pass
+    p = initiate_browser(context)
+    p.goto(url)
+    #pass
+    
     
     
 
